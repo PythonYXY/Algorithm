@@ -505,4 +505,293 @@ class Solution(object):
         return res
                 
 """
+
+// Restore IP Addresses  https://leetcode.com/problems/restore-ip-addresses/
+
+class Solution {
+public:
+    bool valid(int num) {
+        if (num >= 0 && num <= 255) return true;
+        return false;
+    }
+    
+    vector<string> restoreIpAddresses(string s) {
+        vector<string> res;
+        int len = s.size();
+        if (len > 12) return res;
+        
+        for (int i = 0; i <= len - 2; i++) {
+            for (int j = i + 1; j <= len - 2; j++) {
+                for (int k = j + 1; k <= len - 2; k++) {
+                    string num[4];
+                    num[0] = s.substr(0, i + 1);
+                    num[1] = s.substr(i + 1, j - i);
+                    num[2] = s.substr(j + 1, k - j);
+                    num[3] = s.substr(k + 1, len - k);
+                    
+                    
+                    // cout << num1 << ',' << num2 << ',' << num3 << ',' << num4 << endl;
+                    int i = 0;
+                    for (;i < 4; i++) {
+                        if (!valid(atoi(num[i].c_str()))) break;
+                        if (num[i] != to_string(atoi(num[i].c_str()))) break;
+                    }
+                    
+                    if (i == 4) {
+                        string temp = num[0] + '.' + num[1] + '.' + num[2] + '.' + num[3];
+                        res.push_back(temp);
+                    }
+                }
+            }
+        }
+        return res;
+    }
+};
+
+// Shortest Palindrome  https://leetcode.com/problems/shortest-palindrome/
+
+// Longest Palindrome Substring(最长回文字串) -- Manacher Algorithm 
+//https://segmentfault.com/a/1190000003914228
+
+
+"""
+class Solution(object):
+    def shortestPalindrome(self, s):
+        """
+        :type s: str
+        :rtype: str
+        """
+        def manacher(s):
+            s = '#' + '#'.join(s) + '#'
+            # print len(s)
+            rl = [0] * len(s)
+            maxRight = 0
+            pos = 0
+            maxlen = 0
+            # cnt = 0
+            for i in range(len(s)):
+                if i < maxRight:
+                    rl[i] = min(rl[2 * pos - i], maxRight - i)
+                else:
+                    rl[i] = 1
+                    
+                while i - rl[i] >= 0 and i + rl[i] < len(s) and s[i - rl[i]] == s[i + rl[i]]:
+                    rl[i] += 1
+                    # cnt += 1
+                if rl[i] + i - 1 > maxRight:
+                    maxRight = rl[i] + i - 1
+                    pos = i
+                
+                if rl[i] == i + 1:
+                    maxlen = max(maxlen, rl[i])
             
+            # print cnt
+            return maxlen - 1
+        
+        
+        return (s[manacher(s):])[::-1] + s
+    
+"""
+
+
+//Distinct Subsequences https://leetcode.com/problems/distinct-subsequences/
+
+//DFS
+
+"""
+class Solution(object):
+
+    def numDistinct(self, s, t):
+        """
+        :type s: str
+        :type t: str
+        :rtype: int
+        """
+        def answer(l, s, t):
+            if len(s) < len(t):
+                return 0
+            if len(t) == 0:
+                return 1
+            print len(s), len(t)
+            if l[len(s) - 1][len(t) - 1] != -1:
+                return l[len(s) - 1][len(t) - 1]
+            
+            num = 0
+            for i in range(0, len(s) - len(t) + 1):
+                if s[i] == t[0]:
+                    num += answer(l, s[i + 1:], t[1:])
+            
+            l[len(s) - 1][len(t) - 1] = num
+            return num
+            
+        l = [[-1 for i in range(len(t))] for i in range(len(s))]
+        print l
+        return answer(l, s, t)
+"""
+
+//DP
+
+// O(t.size()) Space Complexity
+class Solution {
+public:
+    int numDistinct(string s, string t) {
+        int dp[t.size()];
+        memset(dp, 0, sizeof(dp));
+        for (int i = 0; i < s.size(); i++){
+            for (int j = t.size() - 1; j >= 0; j--) {
+                if (s[i] == t[j]) {
+                    if (j == 0) dp[j]++;
+                    else dp[j] += dp[j - 1];
+                }
+            }
+        }
+        return dp[t.size() - 1];
+        
+    }
+};
+
+// O(s.size() * t.size()) Space Complexity
+class Solution {
+public:
+    int numDistinct(string s, string t) {
+        int n = s.size(), m = t.size();
+        vector<int> row(m + 1, 0);
+        vector<vector<int> > dp(n + 1, row);
+        for(int i = 1; i <= n; i++){
+            for(int j = 1; j <= m; j++){
+                dp[i][j] = dp[i-1][j];
+                if(s[i-1] == t[j-1]) {
+                    dp[i][j] += dp[i-1][j-1];
+                    if(j == 1) dp[i][j]++;
+                }
+            }
+        }
+        return dp[n][m];
+    }
+};
+
+//  Decode Ways  https://leetcode.com/problems/decode-ways/
+
+class Solution {
+public:
+
+    int digit(char s1, char s2){
+        return (s1 - '0') * 10 + (s2 - '0');
+    }
+    
+    int numDecodings(string s) {
+        if (s[0] == '0') return 0;
+        if (s.size() < 2) return s.size();
+
+        
+        for (int i = 0; i < s.size() - 1; i++) {
+            if (s[i + 1] == '0' && (s[i] == '0' || s[i] - '0' > 2)) return 0;
+        }
+        
+        int d[s.size()] = {0};
+        d[0] = 1;
+        
+        if (digit(s[0], s[1]) <= 26 && s[1] != '0') d[1] = 2;
+        else d[1] = 1;
+        
+        for (int i = 2; i < s.size(); i++) {
+            if (s[i] == '0') d[i] = d[i - 2];
+            else if (s[i - 1] == '0') d[i] = d[i - 1];
+            else if (digit(s[i - 1], s[i]) <= 26) d[i] = d[i - 1] + d[i - 2];
+            else d[i] = d[i - 1];
+        }
+        
+       // for (int i = 0; i < s.size(); i++) cout << d[i] << ' ';
+        return d[s.size() - 1];
+    }
+};
+
+
+//Letter Combinations of a Phone Number  https://leetcode.com/problems/letter-combinations-of-a-phone-number/
+"""
+from itertools import product
+
+class Solution(object):
+    def letterCombinations(self, digits):
+        """
+        :type digits: str
+        :rtype: List[str]
+        """
+        numToLetters = {"1":[""], "2":["a", "b", "c"], "3":["d","e","f"], "4":["g","h","i"], "5":["j","k","l"], \
+                        "6":["m","n","o"], "7":["p","q","r","s"], "8":["t","u","v"], "9":["w","x","y","z"], "0":[" "]}
+                    
+        digit_list = [numToLetters[i] for i in digits]
+        res = []
+        
+        for i in product(*digit_list):
+                res.append(''.join(i))
+        
+        return res if digits else []
+
+"""
+
+// Longest Valid Parentheses https://leetcode.com/problems/longest-valid-parentheses/
+
+//Using stack
+
+class Solution {
+public:
+    int longestValidParentheses(string s) {
+        stack<pair<bool, int>> stk;
+        int max_len = 0, cur_len = 0;
+        for (int i = 0; i < s.size(); ++i) {
+            // 如果当前字符为'('
+            if ('(' == s[i]) {
+                stk.push(make_pair(true, i));
+            } 
+            // 如果当前字符为')'
+            else {
+                // 如果栈空，或栈顶为')'，则入栈
+                if (stk.empty() || !stk.top().first) {
+                    stk.push(make_pair(false, i));
+                }
+                // 如果栈不为空，且栈顶为'(',则弹出栈顶'('
+                else {
+                    stk.pop();
+                    // 计算以s[i]结尾的合法括号子串长度
+                    if (stk.empty()) {
+                        cur_len = i + 1;
+                    } else {
+                        cur_len = i - stk.top().second;
+                    }
+                    max_len = max(max_len, cur_len);
+                }
+            }
+        }
+        return max_len;
+    }
+};
+
+// DP
+class Solution {
+public:
+    int longestValidParentheses(string s) {
+        int dp[s.size() + 1];
+        memset(dp, 0, sizeof(dp));
+        
+        for (int i = 1; i <= s.size(); i++) {
+            if (s[i - 1] == '(') dp[i] = 0;
+            else {
+                if (i - 2 - dp[i - 1] < 0) dp[i] = 0;
+                else if (s[i - 2 - dp[i - 1]] == ')') dp[i] = 0;
+                else {
+                    dp[i] = 2 + dp[i - 1] + dp[i - 2 - dp[i - 1]];
+                }
+            }
+        }
+        int res = 0;
+        for (int i = 1; i <= s.size(); i++) {
+            res = max(res, dp[i]);
+        }
+        return res;
+    }
+};
+
+// 算法演示 Longest Valid Parentheses.jpg
+
+//
